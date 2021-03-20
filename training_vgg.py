@@ -1,6 +1,6 @@
 from miniVGG import MiniVGGNet
 from data.build_data import build_data
-from utils.utils import display_bars
+from utils.utils import display_bars, count_classes
 import tensorflow as tf 
 import numpy as np 
 from sklearn.model_selection import train_test_split
@@ -27,29 +27,27 @@ config = {
 if os.path.isfile("data/data.npy"):
     with open("./data/data.npy", "rb") as f: 
         print("Loading serialized data ... \n")
-        serialized_data = pickle.load(f)
-        data = np.array(serialized_data["data"])
-        labels = serialized_data["labels"]
-        target_names = serialized_data["target_names"], 
-        reports = serialized_data["reports"]
+        data = np.load(f) 
+        labels = np.load(f)
+        target_names = np.load(f)
 else: 
     print("Something went wrong ")
+    
     data_infos = build_data() # no serializing
-    data = np.array(data_infos["data"])
+    data = data_infos["data"]
     labels = data_infos["labels"]
     target_names = data_infos["target_names"], 
-    reports = data_infos["reports"] 
 
 #dimensions 
 print(f"Data shape : {data.shape}")
 print(f"Labels shape : {labels.shape}")
-num_classes = len(reports)
+num_classes = len(target_names)
 w, h, c = data.shape[1:]
 
 # anaylising imbalanceness
-
+reports = count_classes(labels, target_names)
 display_bars(
-    [reports[classe]["size"] for classe in reports], 
+    [reports[classe] for classe in reports], 
     target_names
 )
 
@@ -64,7 +62,7 @@ data_augm_gen = tf.keras.preprocessing.image.ImageDataGenerator(
 )
 
 # callbacks 
-log_dir = f"./logs/fit/miniVGG_bs{config[batch_size]}_ep{config[epochs]}"
+log_dir = f"./logs/fit/miniVGG_bs{config['batch_size']}_ep{config['epochs']}"
 checkpoints_path = "./tmp/checkpoint"
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(checkpoints_path, versbose=1), 
@@ -73,20 +71,17 @@ callbacks = [
 
 
 # Loading the model  
-model = MiniVGGNet.build(w, h, c)
+model = MiniVGGNet.build(w, h, c, num_classes)
 
 # compile
 lr = 0.01
 optimizer =  tf.keras.optimizers.SGD(lr)
-
 model.compile(
     optimizer=config["optimizer"], 
     loss="categorical_cross_entropy", 
     metrics=["accuracy"], 
 )
-
 # fit data 
-
 model.fit(
     data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
     steps_per_epoch=len(X_train) // config["batch_size"],
