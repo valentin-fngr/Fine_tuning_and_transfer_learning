@@ -23,6 +23,29 @@ config = {
     "batch_size" : 32, 
     "lr" : 0.01
 }
+
+
+# build top 
+def build_top(input_shape): 
+    inputs = tf.keras.Input(shape=input_shape)
+
+    # todo 
+    # ADD FILTERS AND ALL !! 
+
+    x  = tf.keras.layers.Conv2D(
+        input_shape=input_shape, 
+        activation="relu", 
+        padding="same"
+    )(inputs)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x  = tf.keras.layers.Conv2D(
+        input_shape=input_shape, 
+        activation="relu", 
+        padding="same"
+    )(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    
+
 # retrieving data : load serialized data or build it
 
 if os.path.isfile("data/data.npy"):
@@ -63,41 +86,12 @@ data_augm_gen = tf.keras.preprocessing.image.ImageDataGenerator(
 )
 
 
-
-
-
-
-
-
-
-
-
-# callbacks 
-log_dir = f"./logs/fit/miniVGG_bs{config['batch_size']}_ep{config['epochs']}"
-checkpoints_path = "./tmp/checkpoint"
-callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(checkpoints_path, versbose=1), 
-    tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-] 
-
-
-# Loading the model  
-model = MiniVGGNet.build(w, h, c, num_classes)
-
-# compile
-lr = 0.01
-optimizer =  tf.keras.optimizers.SGD(lr)
-model.compile(
-    optimizer=config["optimizer"], 
-    loss="categorical_cross_entropy", 
-    metrics=["accuracy"], 
+# resnet50
+base_model = tf.keras.applications.ResNet50V2(
+    include_top=False,
+    classes = num_classes, 
+    weights='imagenet', 
+    input_shape=(300, 200, 3)
 )
-# fit data 
-model.fit(
-    data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
-    steps_per_epoch=len(X_train) // config["batch_size"],
-    epochs=config["epochs"], 
-    verbose=1, 
-    validation_split=(X_test, y_test)
-)
-
+base_model.trainable = False
+print(base_model.summary)

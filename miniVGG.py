@@ -9,7 +9,7 @@ class MiniVGGNet:
         inputs = tf.keras.Input(shape=(width, height, depth)) 
         x = inputs
         # model 
-        filters = [32, 64] 
+        filters = [32, 64, 128] 
 
         for f in filters: 
             x = MiniVGGNet._conv_block(x, f, 3, "maxpooling")

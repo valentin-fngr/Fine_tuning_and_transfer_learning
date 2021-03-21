@@ -26,8 +26,7 @@ def build_data(serialize=False):
             try:
                 img_file = tf.keras.preprocessing.image.load_img(image_path, color_mode='rgb', interpolation='nearest') 
                 img_array = tf.keras.preprocessing.image.img_to_array(img_file).astype(np.uint8)
-                img_array = tf.image.resize(img_array, [300, 200])
-                assert img_array.shape == (300,200,3), print(img_array.shape)
+                img_array = tf.image.resize(img_array, [200, 200])
                 data.append(img_array)
                 labels.append(target_names.index(classe))
                 counter += 1

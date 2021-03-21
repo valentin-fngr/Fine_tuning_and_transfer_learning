@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt 
 import numpy as np
+import numpy as np
 
 def display_bars(heights, target_names): 
     plt.figure(figsize=(10,10))
@@ -14,5 +15,11 @@ def count_classes(labels, target_names):
 
     return z
     
+
+def scheduler(epoch, lr): 
+    if epoch < 5: 
+        return lr
+    return lr * np.exp(-0.1)
     
+
     
