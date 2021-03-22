@@ -17,7 +17,7 @@ def count_classes(labels, target_names):
     
 
 def scheduler(epoch, lr): 
-    if epoch < 5: 
+    if epoch < 30: 
         return lr
     return lr * np.exp(-0.1)
     

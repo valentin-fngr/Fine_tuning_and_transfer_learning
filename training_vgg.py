@@ -107,13 +107,13 @@ model.compile(
     loss="categorical_crossentropy", 
     metrics=["accuracy"], 
 )
-# fit data 
-# h = model.fit(
-#     data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
-#     steps_per_epoch=len(X_train) // config["batch_size"],
-#     epochs=config["epochs"], 
-#     verbose=1, 
-#     validation_data=(X_test, y_test), 
-#     callbacks=callbacks
-# )
+#fit data 
+h = model.fit(
+    data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
+    steps_per_epoch=len(X_train) // config["batch_size"],
+    epochs=config["epochs"], 
+    verbose=1, 
+    validation_data=(X_test, y_test), 
+    callbacks=callbacks
+)
 
