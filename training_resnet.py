@@ -16,7 +16,6 @@ print(f"Available GPUs {GPU}")
 
 augm_settings = {
     "vertical_flip": True, 
-    "rescale" : 1/255.0, 
     "fill_mode": "nearest", 
     "rotation_range" : 30, 
     "width_shift_range" : 0.1, 
@@ -62,6 +61,8 @@ w, h, c = data.shape[1:]
 
 # data splitting 
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.30, shuffle=True)
+X_train = X_train / 255.0 
+X_test = X_test / 255.0
 y_train = tf.keras.utils.to_categorical(y_train, num_classes)
 y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 # data augmentation
