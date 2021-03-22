@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import os 
 import matplotlib.pyplot as plt
 import pickle
-
+from sklearn.metrics import classification_report
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 GPU = tf.config.list_physical_devices('GPU')
@@ -23,7 +23,7 @@ augm_settings = {
 }
 
 config = {
-    "epochs" : 200, 
+    "epochs" : 30, 
     "batch_size" : 32, 
     "lr" : 0.01, 
     "image_size" : 224
@@ -97,26 +97,33 @@ print(model.summary())
 # ---- training the top model ------ #
 
 # callbacks 
-log_dir = f"./logs/fit/resnet_transfered_{config['batch_size']}_ep{config['epochs']}"
+log_dir = f"./logs/fit/resnet_transfered_{config['batch_size']}_ep{config['epochs']}_shuffled"
 checkpoints_path = "./train/resnet_transfered_.h5"
 callbacks = [
     tf.keras.callbacks.LearningRateScheduler(scheduler, verbose=1),
     tf.keras.callbacks.ModelCheckpoint(checkpoints_path, versbose=1), 
     tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 ] 
-
 optimizer =  tf.keras.optimizers.SGD(config["lr"])
 model.compile(
     optimizer=optimizer, 
     loss="categorical_crossentropy", 
     metrics=["accuracy"], 
 )
-h = model.fit(
-    data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
-    steps_per_epoch=len(X_train) // config["batch_size"],
-    epochs=config["epochs"], 
-    verbose=1, 
-    validation_data=(X_test, y_test), 
-    callbacks=callbacks
-)
+# h = model.fit(
+#     data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), 
+#     steps_per_epoch=len(X_train) // config["batch_size"],
+#     epochs=config["epochs"], 
+#     verbose=1, 
+#     validation_data=(X_test, y_test), 
+#     callbacks=callbacks
+# )
 
+# laod weight  
+model.load_weights(checkpoints_path)
+
+predictions = model.predict(X_test) 
+print(predictions) 
+print(y_test)
+
+print(classification_report(y_test.argmax(axis=1), predictions.argmax(axis=1), target_names=target_names))
