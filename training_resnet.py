@@ -61,7 +61,7 @@ w, h, c = data.shape[1:]
 # )
 
 # data splitting 
-X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.33)
+X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.30, shuffle=True)
 y_train = tf.keras.utils.to_categorical(y_train, num_classes)
 y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 # data augmentation
