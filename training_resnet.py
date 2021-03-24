@@ -104,7 +104,7 @@ callbacks = [
     tf.keras.callbacks.ModelCheckpoint(checkpoints_path, versbose=1), 
     tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 ] 
-optimizer =  tf.keras.optimizers.SGD(config["lr"])
+optimizer =  tf.keras.optimizers.SGD(config["lr"] * (10**-3)) # very low learning rate 
 model.compile(
     optimizer=optimizer, 
     loss="categorical_crossentropy", 
@@ -126,4 +126,26 @@ predictions = model.predict(X_test)
 print(predictions) 
 print(y_test)
 
+print(classification_report(y_test.argmax(axis=1), predictions.argmax(axis=1), target_names=target_names))
+
+
+print("Fine Tuning Process")
+print("-"*50)
+# unfreezing the layers 
+base_model.trainable = True
+#optimizer
+optimizer =  tf.keras.optimizers.SGD(config["lr"] * 10**-3)
+log_dir = f"./logs/fit/resnet_transfered_{config['batch_size']}_ep{config['epochs']}_shuffled_fined_tuned"
+checkpoints_path = "./train/resnet_transfered_fine_tuned.h5"
+callbacks = [
+    tf.keras.callbacks.ModelCheckpoint(checkpoints_path, versbose=1), 
+    tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+] 
+
+# re-compiling
+model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
+model.fit(data_augm_gen.flow(X_train, y_train, batch_size=config["batch_size"]), epochs=10, callbacks=[callbacks], validation_data=(X_test, y_test))
+model.load_weights(checkpoints_path)
+
+predictions = model.predict(X_test) 
 print(classification_report(y_test.argmax(axis=1), predictions.argmax(axis=1), target_names=target_names))
